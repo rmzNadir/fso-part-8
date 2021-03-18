@@ -1,9 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import reportWebVitals from './reportWebVitals';
+import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache } from '@apollo/client';
 import App from './App';
-
-import { ApolloClient, HttpLink, InMemoryCache, gql } from '@apollo/client';
+import reportWebVitals from './reportWebVitals';
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
@@ -12,28 +11,10 @@ const client = new ApolloClient({
   }),
 });
 
-const query = gql`
-  query {
-    allPersons {
-      name
-      phone
-      address {
-        street
-        city
-      }
-      id
-    }
-  }
-`;
-
-client.query({ query }).then((response) => {
-  console.log(response.data);
-});
-
 ReactDOM.render(
-  <React.StrictMode>
+  <ApolloProvider client={client}>
     <App />
-  </React.StrictMode>,
+  </ApolloProvider>,
   document.getElementById('root')
 );
 
