@@ -46,6 +46,7 @@
     "deprecated-decorator": "^0.1.6",
     "destroy": "^1.0.4",
     "dicer": "^0.3.0",
+    "dotenv": "^8.2.0",
     "ee-first": "^1.1.1",
     "encodeurl": "^1.0.2",
     "es-abstract": "^1.18.0",
@@ -95,6 +96,8 @@
     "mime": "^1.6.0",
     "mime-db": "^1.46.0",
     "mime-types": "^2.1.29",
+    "mongoose": "^5.12.1",
+    "mongoose-unique-validator": "^2.0.3",
     "ms": "^2.0.0",
     "negotiator": "^0.6.2",
     "node-fetch": "^2.6.1",
@@ -142,7 +145,6 @@
     "zen-observable": "^0.8.15",
     "zen-observable-ts": "^0.8.21"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
