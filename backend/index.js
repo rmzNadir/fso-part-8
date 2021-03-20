@@ -183,7 +183,13 @@ const resolvers = {
 
       if (!author) {
         author = new Author({ ...args.author });
-        await author.save();
+        try {
+          await author.save();
+        } catch (e) {
+          throw new UserInputError(e.message, {
+            invalidArgs: args.author,
+          });
+        }
       }
 
       const book = new Book({
@@ -192,7 +198,15 @@ const resolvers = {
         author: author,
         genres: args.genres,
       });
-      await book.save();
+
+      try {
+        await book.save();
+      } catch (e) {
+        const {...bookArgs, author} = args
+        throw new UserInputError(e.message, {
+          invalidArgs: bookArgs,
+        });
+      }
 
       return book;
     },
