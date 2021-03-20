@@ -135,7 +135,7 @@ const typeDefs = gql`
   type Query {
     bookCount: Int!
     authorCount: Int!
-    allBooks(author: String, genre: String): [Book!]!
+    allBooks(author: String, genres: [String!]): [Book!]!
     allAuthors: [Author!]
   }
 
@@ -154,18 +154,18 @@ const resolvers = {
   Query: {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
-    allBooks: (root, { author, genre }) => {
-      if (author && genre) {
+    allBooks: (root, { author, genres }) => {
+      if (author && genres) {
         return Book.find({
-          genres: genre,
+          genres: { $in: genres },
           author: ObjectId(author),
         }).populate('author');
       }
       if (author) {
         return Book.find({ author: ObjectId(author) }).populate('author');
       }
-      if (genre) {
-        return Book.find({ genres: genre }).populate('author');
+      if (genres) {
+        return Book.find({ genres: { $in: genres } }).populate('author');
       }
       return Book.find({});
     },
@@ -202,7 +202,7 @@ const resolvers = {
       try {
         await book.save();
       } catch (e) {
-        const {...bookArgs, author} = args
+        const { author, ...bookArgs } = args;
         throw new UserInputError(e.message, {
           invalidArgs: bookArgs,
         });
