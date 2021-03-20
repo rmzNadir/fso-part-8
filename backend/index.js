@@ -10,6 +10,7 @@ const author = require('./models/author');
 const { NetworkAuthenticationRequire } = require('http-errors');
 
 const { MONGODB_URI } = process.env;
+const { ObjectId } = mongoose.Types;
 
 console.log('connecting to', MONGODB_URI);
 
@@ -154,24 +155,25 @@ const resolvers = {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
     allBooks: (root, { author, genre }) => {
-      // if (author && genre) {
-      //   return books.filter(
-      //     (b) => b.author === author && b.genres.includes(genre)
-      //   );
-      // }
-      // if (author) {
-      //   return books.filter((b) => b.author === author);
-      // }
-      // if (genre) {
-      //   return books.filter((b) => b.genres.includes(genre));
-      // }
+      if (author && genre) {
+        return Book.find({
+          genres: genre,
+          author: ObjectId(author),
+        }).populate('author');
+      }
+      if (author) {
+        return Book.find({ author: ObjectId(author) }).populate('author');
+      }
+      if (genre) {
+        return Book.find({ genres: genre }).populate('author');
+      }
       return Book.find({});
     },
     allAuthors: () => Author.find({}),
   },
   Mutation: {
     addBook: async (root, args) => {
-      let author;
+      let author = await Author.findOne({ name: args.author.name });
 
       if (await Book.findOne({ title: args.title })) {
         throw new UserInputError('Book already exists', {
@@ -179,7 +181,7 @@ const resolvers = {
         });
       }
 
-      if (!(await Author.findOne({ name: args.author.name }))) {
+      if (!author) {
         author = new Author({ ...args.author });
         await author.save();
       }
@@ -208,7 +210,7 @@ const resolvers = {
   },
   Author: {
     bookCount: (root) => {
-      return books.filter((b) => b.author === root.name).length;
+      return Book.find({ author: ObjectId(root.id) }).countDocuments();
     },
   },
 };
