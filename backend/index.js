@@ -110,7 +110,14 @@ const resolvers = {
       }
       return Book.find({}).populate('author');
     },
-    allAuthors: () => Author.find({}),
+    allAuthors: async () => {
+      // No n+1 problem here
+      // console.log('Find author');
+      const authors = Author.find({});
+      // console.log('Count books');
+
+      return authors;
+    },
     me: (root, args, context) => {
       return context.currentUser;
     },
@@ -202,6 +209,7 @@ const resolvers = {
   },
   Author: {
     bookCount: (root) => {
+      // No n+1 problem here
       return Book.find({ author: ObjectId(root.id) }).countDocuments();
     },
   },
