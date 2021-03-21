@@ -13,14 +13,17 @@ const NewBook = (props) => {
   const [genres, setGenres] = useState([]);
   const [existsAlready, setExistsAlready] = useState(false);
   const [bookGenres, setBookGenres] = useState([]);
-  const [queries, setQueries] = useState([{ query: ALL_AUTHORS }]);
+  // const [queries, setQueries] = useState([{ query: ALL_AUTHORS }]);
 
   const { data } = useQuery(ALL_BOOKS);
 
   const { allBooks } = { ...data };
 
   const [addBook] = useMutation(ADD_BOOK, {
-    refetchQueries: queries,
+    // We removed query "ALL_BOOKS" so the cache update
+    // is now done by the function "updateAllBooksCache"
+    // after the subscription returns info of a new book
+    refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (e) => console.log(e),
   });
 
@@ -64,13 +67,14 @@ const NewBook = (props) => {
     setGenres([]);
     setGenre('');
     setBorn('');
+    setBookGenres([]);
   };
 
   const addGenre = () => {
     setBookGenres([...bookGenres, genre]);
     setGenres(genres.concat(genre));
     setGenre('');
-    setQueries([...queries, { query: ALL_BOOKS }]);
+    // setQueries([...queries, { query: ALL_BOOKS }]);
   };
 
   return (
