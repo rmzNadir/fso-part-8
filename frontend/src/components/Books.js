@@ -6,6 +6,7 @@ const Books = (props) => {
   const [activeGenre, setActiveGenre] = useState(null);
 
   const { data } = useQuery(ALL_BOOKS);
+
   const { allBooks } = { ...data };
 
   let genres = [];
