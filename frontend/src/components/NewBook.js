@@ -75,7 +75,7 @@ const NewBook = (props) => {
     setGenre('');
     setQueries([...queries, { query: ALL_BOOKS }]);
   };
-  console.log('updateAll', updateAll);
+
   return (
     <div>
       <form onSubmit={submit}>
