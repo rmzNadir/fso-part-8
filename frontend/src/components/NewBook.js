@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useMutation } from '@apollo/client';
+import React, { useState, useEffect } from 'react';
+import { useMutation, useQuery } from '@apollo/client';
 import { ADD_BOOK } from '../mutations';
 import { ALL_BOOKS, ALL_AUTHORS } from '../queries';
+import GenreSelector from './GenreSelector';
 
 const NewBook = (props) => {
   const [title, setTitle] = useState('');
@@ -10,11 +11,37 @@ const NewBook = (props) => {
   const [published, setPublished] = useState('');
   const [genre, setGenre] = useState('');
   const [genres, setGenres] = useState([]);
+  const [updateAll, setUpdateAll] = useState(false);
+  const [existsAlready, setExistsAlready] = useState(false);
+  const [bookGenres, setBookGenres] = useState([]);
+  const [queries, setQueries] = useState([{ query: ALL_AUTHORS }]);
+
+  const { data } = useQuery(ALL_BOOKS);
+
+  const { allBooks } = { ...data };
 
   const [addBook] = useMutation(ADD_BOOK, {
-    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }],
+    refetchQueries: queries,
     onError: (e) => console.log(e),
   });
+
+  useEffect(() => {
+    if (allBooks) {
+      const allGenres = allBooks
+        .map((b) => b.genres)
+        .flat()
+        .filter((v, i, a) => a.indexOf(v) === i);
+
+      setBookGenres(allGenres);
+    }
+  }, [allBooks]);
+
+  useEffect(() => {
+    const exists =
+      bookGenres &&
+      bookGenres.find((g) => g.toLowerCase() === genre.toLowerCase());
+    exists ? setExistsAlready(true) : setExistsAlready(false);
+  }, [genre, bookGenres]);
 
   if (!props.show) {
     return null;
@@ -38,13 +65,17 @@ const NewBook = (props) => {
     setGenres([]);
     setGenre('');
     setBorn('');
+    setUpdateAll(false);
   };
 
   const addGenre = () => {
+    setBookGenres([...bookGenres, genre]);
+    setUpdateAll(true);
     setGenres(genres.concat(genre));
     setGenre('');
+    setQueries([...queries, { query: ALL_BOOKS }]);
   };
-
+  console.log('updateAll', updateAll);
   return (
     <div>
       <form onSubmit={submit}>
@@ -78,12 +109,29 @@ const NewBook = (props) => {
             onChange={({ target }) => setPublished(target.value)}
           />
         </div>
+
+        {bookGenres &&
+          bookGenres.map((g, i) => (
+            <GenreSelector
+              genre={g}
+              key={i}
+              genres={genres}
+              setGenres={setGenres}
+            />
+          ))}
+
+        {existsAlready && (
+          <p style={{ color: 'red', fontWeight: 'bold' }}>
+            Genre {genre} already exists!
+          </p>
+        )}
+
         <div>
           <input
             value={genre}
             onChange={({ target }) => setGenre(target.value)}
           />
-          <button onClick={addGenre} type='button'>
+          <button onClick={addGenre} type='button' disabled={existsAlready}>
             add genre
           </button>
         </div>
