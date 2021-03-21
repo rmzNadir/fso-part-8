@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 
-const inputDefs = gql`
+gql`
   input AuthorInput {
     name: String!
     born: Int
