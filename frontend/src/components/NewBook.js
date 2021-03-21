@@ -6,12 +6,14 @@ import { ALL_BOOKS, ALL_AUTHORS } from '../queries';
 const NewBook = (props) => {
   const [title, setTitle] = useState('');
   const [author, setAuhtor] = useState('');
+  const [born, setBorn] = useState('');
   const [published, setPublished] = useState('');
   const [genre, setGenre] = useState('');
   const [genres, setGenres] = useState([]);
 
   const [addBook] = useMutation(ADD_BOOK, {
     refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }],
+    onError: (e) => console.log(e),
   });
 
   if (!props.show) {
@@ -21,13 +23,21 @@ const NewBook = (props) => {
   const submit = async (event) => {
     event.preventDefault();
 
-    addBook({ variables: { title, published: +published, author, genres } });
+    addBook({
+      variables: {
+        title,
+        published: +published,
+        author: { name: author, born: born.length > 0 ? +born : null },
+        genres,
+      },
+    });
 
     setTitle('');
     setPublished('');
     setAuhtor('');
     setGenres([]);
     setGenre('');
+    setBorn('');
   };
 
   const addGenre = () => {
@@ -50,6 +60,14 @@ const NewBook = (props) => {
           <input
             value={author}
             onChange={({ target }) => setAuhtor(target.value)}
+          />
+        </div>
+        <div>
+          born
+          <input
+            type='number'
+            value={born}
+            onChange={({ target }) => setBorn(target.value)}
           />
         </div>
         <div>
