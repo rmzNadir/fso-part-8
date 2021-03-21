@@ -5,6 +5,7 @@ const {
   UserInputError,
   AuthenticationError,
   gql,
+  PubSub,
 } = require('apollo-server');
 
 const mongoose = require('mongoose');
@@ -16,6 +17,7 @@ const User = require('./models/user');
 
 const { MONGODB_URI, JWT_SECRET } = process.env;
 const { ObjectId } = mongoose.Types;
+const pubsub = new PubSub();
 
 console.log('connecting to', MONGODB_URI);
 
@@ -82,6 +84,10 @@ const typeDefs = gql`
     editAuthor(id: String!, born: Int!): Author
     createUser(username: String!, favoriteGenre: String!): User
     login(username: String!, password: String!): Token
+  }
+
+  type Subscription {
+    bookAdded: Book!
   }
 `;
 
@@ -150,6 +156,8 @@ const resolvers = {
         });
       }
 
+      pubsub.publish('BOOK_ADDED', { bookAdded: book });
+
       return book;
     },
     createUser: async (root, { username, favoriteGenre }) => {
@@ -197,6 +205,11 @@ const resolvers = {
       return Book.find({ author: ObjectId(root.id) }).countDocuments();
     },
   },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED']),
+    },
+  },
 };
 
 const server = new ApolloServer({
@@ -215,8 +228,9 @@ const server = new ApolloServer({
   },
 });
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
   console.log(`Server ready at ${url}`);
+  console.log(`Subscriptions ready at ${subscriptionsUrl}`);
 });
 
 // Mutation example
