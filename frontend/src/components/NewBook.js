@@ -11,7 +11,6 @@ const NewBook = (props) => {
   const [published, setPublished] = useState('');
   const [genre, setGenre] = useState('');
   const [genres, setGenres] = useState([]);
-  const [updateAll, setUpdateAll] = useState(false);
   const [existsAlready, setExistsAlready] = useState(false);
   const [bookGenres, setBookGenres] = useState([]);
   const [queries, setQueries] = useState([{ query: ALL_AUTHORS }]);
@@ -65,12 +64,10 @@ const NewBook = (props) => {
     setGenres([]);
     setGenre('');
     setBorn('');
-    setUpdateAll(false);
   };
 
   const addGenre = () => {
     setBookGenres([...bookGenres, genre]);
-    setUpdateAll(true);
     setGenres(genres.concat(genre));
     setGenre('');
     setQueries([...queries, { query: ALL_BOOKS }]);
